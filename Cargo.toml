@@ -1,0 +1,14 @@
+[package]
+name = "bridges"
+version = "0.1.0"
+authors = ["Patrick José Pereira <patrickelectric@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "2.31.2"
+libc = "0.2.*"
+mio = "0.6"
+mio-serial = "3.2.0"
+serialport = "*"
