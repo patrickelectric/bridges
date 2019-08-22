@@ -124,7 +124,7 @@ pub fn main() {
     // With edge triggered events, we must perform reading until we receive a WouldBlock.
     // Check https://docs.rs/mio/0.6/mio/struct.Poll.html for details.
     'outer: loop {
-        if let Err(ref e) = poll.poll(&mut events, Some(time::Duration::from_micros(1))) {
+        if let Err(ref e) = poll.poll(&mut events, None) {
             println!("poll failed: {}", e);
             break;
         }
