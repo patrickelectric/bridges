@@ -109,8 +109,8 @@ pub fn main() {
     let mut serial_buffer = [0u8; 4096];
     let mut udp_buffer = [0u8; 4096];
 
-    // Hold the last UDP client, this is the default client that will receive the serial output
-    let mut client = addr;
+    // Hold a list of clients
+    let mut clients = Vec::<std::net::SocketAddr>::new();
 
     // Configure poll and events
     let poll = Poll::new().expect("Failed to create poll.");
@@ -143,12 +143,15 @@ pub fn main() {
                     if ready.is_readable() {
                         loop {
                             match socket.recv_from(&mut udp_buffer) {
-                                Ok((_count, _client)) => {
-                                    client = _client;
+                                Ok((_count, client)) => {
+                                    if !clients.contains(&client) {
+                                        clients.push(client);
+                                    }
+
                                     if verbose {
                                         println!(
                                             "From {}: {:?}",
-                                            _client.ip(),
+                                            client.ip(),
                                             &udp_buffer[.._count]
                                         );
                                     }
@@ -183,9 +186,11 @@ pub fn main() {
                                             &serial_buffer[..count]
                                         );
                                     }
-                                    socket
-                                        .send_to(&serial_buffer[..count], &client)
-                                        .expect("Failed to write for UDP client.");
+                                    for client in clients.iter() {
+                                        socket
+                                            .send_to(&serial_buffer[..count], &client)
+                                            .expect("Failed to write for UDP client.");
+                                    }
                                 }
                                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
                                     break;
