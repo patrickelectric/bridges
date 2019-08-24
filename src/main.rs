@@ -62,12 +62,15 @@ pub fn main() {
                 .default_value("0.0.0.0:9092"),
         )
         .arg(
-            Arg::with_name("v")
+            Arg::with_name("verbose")
                 .short("v")
                 .long("verbose")
                 .help("Enables verbosity"),
         )
         .get_matches();
+
+    // Check verbose mode
+    let verbose = matches.is_present("verbose");
 
     // Configure serial port
     let serial_arg_result = matches
@@ -142,6 +145,9 @@ pub fn main() {
                             match socket.recv_from(&mut udp_buffer) {
                                 Ok((_count, _client)) => {
                                     client = _client;
+                                    if verbose {
+                                        println!("From {}: {:?}", _client.ip(), &udp_buffer[.._count]);
+                                    }
                                     rx.write_all(&udp_buffer[.._count])
                                         .expect("Failed to write in serial device.");
                                 }
@@ -166,6 +172,9 @@ pub fn main() {
                         loop {
                             match rx.read(&mut serial_buffer) {
                                 Ok(count) => {
+                                    if verbose {
+                                        println!("From {:?}: {:?}", mio_serial::SerialPort::name(&rx).unwrap(), &serial_buffer[..count]);
+                                    }
                                     socket
                                         .send_to(&serial_buffer[..count], &client)
                                         .expect("Failed to write for UDP client.");
