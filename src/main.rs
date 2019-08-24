@@ -103,7 +103,7 @@ pub fn main() {
         .expect("Unable to parse socket address");
     let socket = UdpSocket::bind(&addr).expect("It was not possible to do UDP bind.");
 
-    println!("Server in {:?}", &socket.local_addr().ok());
+    println!("Server in {}", &socket.local_addr().unwrap());
 
     // Set buffer for serial and UDP
     let mut serial_buffer = [0u8; 4096];
@@ -128,7 +128,7 @@ pub fn main() {
     // Check https://docs.rs/mio/0.6/mio/struct.Poll.html for details.
     'outer: loop {
         if let Err(ref e) = poll.poll(&mut events, None) {
-            println!("poll failed: {}", e);
+            println!("Poll failed: {}", e);
             break;
         }
 
