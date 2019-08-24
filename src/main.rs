@@ -146,7 +146,11 @@ pub fn main() {
                                 Ok((_count, _client)) => {
                                     client = _client;
                                     if verbose {
-                                        println!("From {}: {:?}", _client.ip(), &udp_buffer[.._count]);
+                                        println!(
+                                            "From {}: {:?}",
+                                            _client.ip(),
+                                            &udp_buffer[.._count]
+                                        );
                                     }
                                     rx.write_all(&udp_buffer[.._count])
                                         .expect("Failed to write in serial device.");
@@ -173,7 +177,11 @@ pub fn main() {
                             match rx.read(&mut serial_buffer) {
                                 Ok(count) => {
                                     if verbose {
-                                        println!("From {:?}: {:?}", mio_serial::SerialPort::name(&rx).unwrap(), &serial_buffer[..count]);
+                                        println!(
+                                            "From {:?}: {:?}",
+                                            mio_serial::SerialPort::name(&rx).unwrap(),
+                                            &serial_buffer[..count]
+                                        );
                                     }
                                     socket
                                         .send_to(&serial_buffer[..count], &client)
