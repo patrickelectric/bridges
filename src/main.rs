@@ -39,10 +39,10 @@ fn is_closed(state: Ready) -> bool {
 
 pub fn main() {
     let usb_arg_format = "SERIAL_PORT:BAUD_RATE";
-    let matches = App::new("Bridges")
-        .version("1.0")
+    let matches = App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
         .about("Does serial<->UDP bridges, for now.")
-        .author("Patrick J.P. <patrickelectric@gmail.com>")
+        .author(env!("CARGO_PKG_AUTHORS"))
         .arg(
             Arg::with_name("serial_port")
                 .short("p")
