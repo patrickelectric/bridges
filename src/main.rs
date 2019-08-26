@@ -62,6 +62,15 @@ pub fn main() {
                 .default_value("0.0.0.0:9092"),
         )
         .arg(
+            Arg::with_name("timeout")
+                .short("t")
+                .long("timeout")
+                .value_name("TIMEOUT")
+                .help("Set the timeout of UDP clients that does not communicate with server in milliseconds.")
+                .takes_value(true)
+                .default_value("10000"),
+        )
+        .arg(
             Arg::with_name("verbose")
                 .short("v")
                 .long("verbose")
@@ -71,6 +80,13 @@ pub fn main() {
 
     // Check verbose mode
     let verbose = matches.is_present("verbose");
+
+    // Set timeout
+    let timeout: u128 = matches
+        .value_of("timeout")
+        .unwrap()
+        .parse::<u128>()
+        .unwrap_or_else(|_| panic!("Expected u128 value got {:?}", matches.value_of("timeout")));
 
     // Configure serial port
     let serial_arg_result = matches
@@ -109,8 +125,10 @@ pub fn main() {
     let mut serial_buffer = [0u8; 4096];
     let mut udp_buffer = [0u8; 4096];
 
-    // Hold a list of clients
-    let mut clients = Vec::<std::net::SocketAddr>::new();
+    // Hold a list of clients with timeouts
+    let mut clients = std::collections::HashMap::<std::net::SocketAddr, u128>::new();
+    // Get the time to calculate timeout of the clients
+    let now = std::time::Instant::now();
 
     // Configure poll and events
     let poll = Poll::new().expect("Failed to create poll.");
@@ -132,6 +150,9 @@ pub fn main() {
             break;
         }
 
+        // Elapsed time to calculate clients timeout
+        let elapsed_time_ms = now.elapsed().as_millis();
+
         for event in events.iter() {
             match event.token() {
                 UDP_TOKEN => {
@@ -144,14 +165,13 @@ pub fn main() {
                         loop {
                             match socket.recv_from(&mut udp_buffer) {
                                 Ok((_count, client)) => {
-                                    if !clients.contains(&client) {
-                                        clients.push(client);
-                                    }
+                                    clients.insert(client, elapsed_time_ms);
 
                                     if verbose {
+                                        println!("< {}: {:?}", client.ip(), &udp_buffer[.._count]);
                                         println!(
-                                            "From {}: {:?}",
-                                            client.ip(),
+                                            "> {:?}: {:?}",
+                                            mio_serial::SerialPort::name(&rx).unwrap(),
                                             &udp_buffer[.._count]
                                         );
                                     }
@@ -181,12 +201,22 @@ pub fn main() {
                                 Ok(count) => {
                                     if verbose {
                                         println!(
-                                            "From {:?}: {:?}",
+                                            "< {:?}: {:?}",
                                             mio_serial::SerialPort::name(&rx).unwrap(),
                                             &serial_buffer[..count]
                                         );
                                     }
-                                    for client in clients.iter() {
+                                    clients.retain(|_, last_time| {
+                                        elapsed_time_ms - *last_time < timeout
+                                    });
+                                    for (client, _) in &clients {
+                                        if verbose {
+                                            println!(
+                                                "> {}: {:?}",
+                                                client.ip(),
+                                                &serial_buffer[..count]
+                                            );
+                                        }
                                         socket
                                             .send_to(&serial_buffer[..count], &client)
                                             .expect("Failed to write for UDP client.");
