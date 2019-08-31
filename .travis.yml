@@ -32,13 +32,18 @@ install:
   - cargo build --verbose --release --target=$TARGET
   - cp target/$TARGET/release/$CRATE_NAME $CRATE_NAME-$TARGET
 
+before_deploy:
+  - git config --local user.name "Patrick José Pereira"
+  - git config --local user.email "patrickelectric@gmail.com"
+  - export TRAVIS_TAG=${TRAVIS_TAG:-continuous}
+  - git tag $TRAVIS_TAG --force
+
 deploy:
+  provider: releases
   api_key:
     secure: CJOaby8Q1/DiVtchRfYTTgWBvx/DM8Gq8tBO5AY3+z0eiqn2MJ6//FtV9SiVX7uOfBDH73TWNxY7+015mMKbI6s4UAbDU9FUtIfJmjU+qgXmB0+QA7E8cqkmBIgECyQep7q0tipFYo/nZGYpmQZ426cHb+goaTdzcp4Owp+SoIDD8bsD7JS7Z+1OvEkqj6zKH/NYXEH+eEWkTHhe3ngqOwe4KgtaQnbTbBARB1q5qaBpBaFjziB2Nz3+aimGoGfYU4MZFgsw7q0JGMvfRP2qYX2yQSSJ3oJHPadkYBayjZRJGB6xmFae6h4wC94tdoARIi0EFhHlGT640irxseDlBZQrE48MdhyHv09ophfZFPlet/Ewcax9a6NcUgredATvI9QbstBgBj5ppS+PC3OiPaamg67t8UY7yEXTXEQWF33o2d9qWiP3pkJlpMbT24NFn1TCL+56R44vErgnMVRaZ6x65ELu/joBN9lD5sUyo+a00DvtG0+p5f/0BlTl08HijcPKqhqYeprAbJvO4mgNtf3Nj82aJFEPZ3usdgHHWS9tgrdUHz7MqNmmFOoM1/yFc0/1/AdeikRXQ3rkjqV/1NBDURlcIddKKJpS+q0GfeO9NFvUenUSuZtVdpyMyZuSjoKpaUuE/regd1Ol+mg/o5H8detjtWWqAfsToiGSAPU=
   file_glob: true
-  file: $CRATE_NAME-$TARGET
-  on:
-    tags: true
-  provider: releases
+  overwrite: true
   skip_cleanup: true
+  file: $CRATE_NAME-$TARGET
   name: $TRAVIS_TAG
