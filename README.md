@@ -2,6 +2,9 @@
 
 A simple UDP-Serial interface.
 
+## Install :zap:
+- :gear: Cargo Install: `cargo install bridges`
+
 ## Downloads :package:
 
 - :computer: Not available
