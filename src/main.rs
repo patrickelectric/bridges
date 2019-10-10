@@ -39,6 +39,7 @@ fn is_closed(_: Ready) -> bool {
 
 pub fn main() {
     let usb_arg_format = "SERIAL_PORT:BAUD_RATE";
+    let available_serial_ports_name = "available_serial_ports";
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .about("Does serial<->UDP bridges, for now.")
@@ -50,7 +51,7 @@ pub fn main() {
                 .value_name(usb_arg_format)
                 .help("Sets the connection serial port and baud rate")
                 .takes_value(true)
-                .default_value("/dev/ttyUSB0:2000000"),
+                .required_unless(available_serial_ports_name),
         )
         .arg(
             Arg::with_name("udp_port")
@@ -76,10 +77,20 @@ pub fn main() {
                 .long("verbose")
                 .help("Enables verbosity"),
         )
+        .arg(
+            Arg::with_name(available_serial_ports_name)
+                .long("available-serial-ports")
+                .help("Prints the available serial ports."),
+        )
         .get_matches();
 
     // Check verbose mode
     let verbose = matches.is_present("verbose");
+
+    if matches.is_present("available_serial_ports") {
+        println!("{:#?}", mio_serial::available_ports().unwrap());
+        return;
+    }
 
     // Set timeout
     let timeout: u128 = matches
