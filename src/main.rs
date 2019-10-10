@@ -175,8 +175,12 @@ pub fn main() {
                                             &udp_buffer[.._count]
                                         );
                                     }
-                                    rx.write_all(&udp_buffer[.._count])
-                                        .expect("Failed to write in serial device.");
+                                    match rx.write_all(&udp_buffer[.._count]) {
+                                        Err(e) => {
+                                            println!("Error while writing in serial: {:?}", e)
+                                        }
+                                        Ok(_) => (),
+                                    };
                                 }
                                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
                                     break;
@@ -217,9 +221,12 @@ pub fn main() {
                                                 &serial_buffer[..count]
                                             );
                                         }
-                                        socket
-                                            .send_to(&serial_buffer[..count], &client)
-                                            .expect("Failed to write for UDP client.");
+                                        match socket.send_to(&serial_buffer[..count], &client) {
+                                            Err(e) => {
+                                                println!("Error while writing in UDP: {:?}", e)
+                                            }
+                                            Ok(_) => (),
+                                        };
                                     }
                                 }
                                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
