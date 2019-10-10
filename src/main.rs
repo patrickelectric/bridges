@@ -33,7 +33,7 @@ fn is_closed(state: Ready) -> bool {
 }
 
 #[cfg(windows)]
-fn is_closed(state: Ready) -> bool {
+fn is_closed(_: Ready) -> bool {
     false
 }
 
