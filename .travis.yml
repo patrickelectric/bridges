@@ -46,4 +46,5 @@ deploy:
   overwrite: true
   skip_cleanup: true
   file: $CRATE_NAME-$TARGET
-  name: $TRAVIS_TAG
+  on:
+    all_branches: true
