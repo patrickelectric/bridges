@@ -38,5 +38,3 @@ deploy:
   auth_token:
     secure: F1UkKeXIf6IItNy1am/vJeA1Qls783JStLkeYgF03TUknD3E+n5JHRBptKqtycrS
   provider: GitHub
-  on:
-    appveyor_repo_tag: false
