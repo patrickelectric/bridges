@@ -8,25 +8,44 @@ env:
 
 matrix:
   include:
-    - env:
-      - TARGET=armv7-unknown-linux-musleabihf
-      - LINKER=gcc-5-arm-linux-gnueabihf
-      - COMPILER=arm-linux-gnueabihf-gcc-5
-    - env:
-      - TARGET=x86_64-unknown-linux-musl
-      - LINKER=gcc
-      - COMPILER=gcc
+    - os: linux
+      dist: xenial
+      env:
+        - TARGET=armv7-unknown-linux-musleabihf
+        - LINKER=gcc-5-arm-linux-gnueabihf
+        - COMPILER=arm-linux-gnueabihf-gcc-5
+      addons:
+        apt:
+          packages:
+            - libudev-dev
+
+    - os: linux
+      dist: xenial
+      env:
+        - TARGET=x86_64-unknown-linux-musl
+        - LINKER=gcc
+        - COMPILER=gcc
+      addons:
+        apt:
+          packages:
+            - libudev-dev
+
+    - os: osx
+      compiler: clang
+      env:
+        - TARGET=x86_64-apple-darwin
+        - LINKER=clang
+        - COMPILER=clang
 
 before_install:
   - set -e
   - rustup self update
 
 install:
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt install -y $LINKER; fi
   - rustup install stable
   - rustup default stable
   - rustup target install $TARGET
-  - sudo apt update
-  - sudo apt install -y $LINKER libudev-dev
   - echo -e "\n[target.$TARGET]\nlinker = '$COMPILER'" > ~/.cargo/config
   - cat ~/.cargo/config
   - cargo build --verbose --release --target=$TARGET
