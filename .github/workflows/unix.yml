@@ -1,4 +1,4 @@
-name: Deploy bridges
+name: Deploy bridges unix
 
 on:
   push:
