@@ -63,6 +63,11 @@ pub fn main() {
                 .default_value("0.0.0.0:9092"),
         )
         .arg(
+            Arg::with_name("as_client")
+                .long("as-client")
+                .help("Uses UDP connection as a client.")
+        )
+        .arg(
             Arg::with_name("timeout")
                 .short("t")
                 .long("timeout")
@@ -128,7 +133,18 @@ pub fn main() {
         .unwrap()
         .parse()
         .expect("Unable to parse socket address");
-    let socket = UdpSocket::bind(&addr).expect("It was not possible to do UDP bind.");
+
+    let socket = match matches.is_present("as_client") {
+        true => {
+            let socket = UdpSocket::bind(&"0.0.0.0:0".parse::<std::net::SocketAddr>().unwrap())
+                .expect("It was not possible to do UDP connection");
+            socket
+                .connect(addr)
+                .expect("Failed to connect, Make sure that server is running");
+            socket
+        }
+        false => UdpSocket::bind(&addr).expect("It was not possible to do UDP bind."),
+    };
 
     println!("Server in {}", &socket.local_addr().unwrap());
 
