@@ -43,7 +43,7 @@ jobs:
       with:
         use-cross: true
         command: build
-        args: --verbose --release --target=${{ matrix.TARGET }}
+        args: +nightly -Z unstable-options --verbose --release --target=${{ matrix.TARGET }}
 
     - name: Rename
       run: cp target/${{ matrix.TARGET }}/release/bridges bridges-${{ matrix.TARGET }}
