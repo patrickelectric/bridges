@@ -6,7 +6,7 @@ pub struct Socket {
 }
 
 pub fn new(address: &str) -> Result<Socket, std::io::Error> {
-    let mut socket = std::net::UdpSocket::bind(address)?;
+    let socket = std::net::UdpSocket::bind(address)?;
     socket.set_read_timeout(Some(std::time::Duration::from_micros(100)))?;
     Ok(Socket {
         socket,

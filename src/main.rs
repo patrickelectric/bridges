@@ -2,8 +2,6 @@
 
 use clap::{self, Clap};
 
-mod links;
-
 use std::io::Read;
 use std::path::PathBuf;
 
@@ -51,7 +49,7 @@ struct Opts {
     udp_address: String,
 }
 
-pub fn main() {
+pub fn main() -> Result<(), std::io::Error> {
     let opts: Opts = Opts::parse();
 
     let available_serial_ports = serialport::available_ports().unwrap_or_default();
@@ -65,12 +63,12 @@ pub fn main() {
                 .collect::<Vec<String>>()
                 .join(", ")
         );
-        return;
+        return Ok(());
     }
 
     if opts.available_serial_ports_full {
         println!("Available serial ports:\n{:#?}", available_serial_ports);
-        return;
+        return Ok(());
     }
 
     if !opts.serial_port.as_ref().unwrap().exists() {
@@ -100,21 +98,23 @@ pub fn main() {
 
     let mut serial = serialport::new(serial_path, baud_rate)
         .open()
-        .expect(&format!(
-            "Failed to open port: {} with baudrate {}",
-            serial_path, baud_rate
-        ));
+        .unwrap_or_else(|_| {
+            panic!(
+                "Failed to open port: {} with baudrate {}",
+                serial_path, baud_rate
+            )
+        });
 
     let socket = socket::new(&opts.udp_address)
         .unwrap_or_else(|error| panic!("Failed to bind address: {}", error));
 
     // Serial and socket are ready, time to run ABR
     if opts.automatic_baud_rate_procedure {
-        serial.set_break();
+        serial.set_break()?;
         std::thread::sleep(std::time::Duration::from_millis(10));
-        serial.clear_break();
+        serial.clear_break()?;
         std::thread::sleep(std::time::Duration::from_micros(10));
-        serial.write(&vec!['U' as u8; 10]);
+        serial.write_all(&[b'U'; 10])?;
     }
 
     let mut serial_vector = vec![0; 4096];
@@ -128,7 +128,7 @@ pub fn main() {
 
         let data = socket.read();
         if !data.is_empty() {
-            serial.write(&data);
+            serial.write_all(&data)?;
         }
 
         // Avoid cpu spin lock
