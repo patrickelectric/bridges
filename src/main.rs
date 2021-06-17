@@ -4,6 +4,7 @@
 extern crate lazy_static;
 
 mod cli;
+mod log;
 mod socket;
 
 pub fn main() -> Result<(), std::io::Error> {
@@ -28,6 +29,7 @@ pub fn main() -> Result<(), std::io::Error> {
 
     let (serial_path, baud_rate) = cli::serial_port_configuration();
 
+    log!("Serial port: {} with baud rate {}", serial_path, baud_rate);
     let mut serial = serialport::new(serial_path, baud_rate)
         .open()
         .unwrap_or_else(|_| {
@@ -37,11 +39,14 @@ pub fn main() -> Result<(), std::io::Error> {
             )
         });
 
-    let socket = socket::new(&cli::options().udp_address)
+    let socket_address = &cli::options().udp_address;
+    log!("UDP server: {}", socket_address);
+    let socket = socket::new(&socket_address)
         .unwrap_or_else(|error| panic!("Failed to bind address: {}", error));
 
     // Serial and socket are ready, time to run ABR
     if cli::options().automatic_baud_rate_procedure {
+        log!("Start ABR procedure");
         serial.set_break()?;
         std::thread::sleep(std::time::Duration::from_millis(10));
         serial.clear_break()?;
@@ -54,6 +59,7 @@ pub fn main() -> Result<(), std::io::Error> {
         if let Ok(size) = serial.read(&mut serial_vector) {
             let data = serial_vector[..size].to_vec();
             if !data.is_empty() {
+                log!("R {} : {:?}", serial_path, data);
                 socket.write(&data);
             }
         }
