@@ -25,7 +25,7 @@ jobs:
 
     - name: Building ${{ matrix.TARGET }}
       run: |
-        cargo build --verbose --release
+        cargo +nightly -Z unstable-options build --verbose --release
         ls target
         ls target/release
 

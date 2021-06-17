@@ -2,7 +2,7 @@ environment:
   PROJECT_NAME: bridges
   matrix:
     - TARGET: i686-pc-windows-msvc
-      CHANNEL: stable
+      CHANNEL: nightly
 
 # Install Rust and Cargo
 # (Based on from https://github.com/rust-lang/libc/blob/master/appveyor.yml)
@@ -17,7 +17,7 @@ install:
 
 build_script:
   # Generate artifacts for release
-  - cargo build --release
+  - cargo +nightly -Z unstable-options build --release
   - mkdir deploy
   - copy target\release\%PROJECT_NAME%.exe deploy
   - cd deploy
