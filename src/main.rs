@@ -19,6 +19,10 @@ struct Opts {
     #[clap(short = 'v', long = "verbose")]
     verbose: bool,
 
+    /// Enable ABR (Automatic Baud Rate) procedure
+    #[clap(long = "abr")]
+    automatic_baud_rate_procedure: bool,
+
     /// Sets the connection serial port and baud rate, default baud rate is 115200
     #[clap(
         short = 'p',
@@ -103,6 +107,15 @@ pub fn main() {
 
     let socket = socket::new(&opts.udp_address)
         .unwrap_or_else(|error| panic!("Failed to bind address: {}", error));
+
+    // Serial and socket are ready, time to run ABR
+    if opts.automatic_baud_rate_procedure {
+        serial.set_break();
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        serial.clear_break();
+        std::thread::sleep(std::time::Duration::from_micros(10));
+        serial.write(&vec!['U' as u8; 10]);
+    }
 
     let mut serial_vector = vec![0; 4096];
     loop {
