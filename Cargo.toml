@@ -20,5 +20,6 @@ name = "bridges"
 
 [dependencies]
 clap = "3.0.0-beta.2"
+lazy_static = "1.4.0"
 serialport = "4.0"
 
