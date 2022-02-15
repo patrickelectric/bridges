@@ -4,7 +4,6 @@ use clap::Parser;
 /// as do all doc strings on fields
 #[derive(Parser, Debug)]
 #[clap(version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"), about = "Does serial<->UDP bridges, for now.")]
-#[clap(setting = clap::AppSettings::ColoredHelp)]
 pub struct Options {
     /// Enable verbosity
     #[clap(short = 'v', long = "verbose")]
