@@ -1,8 +1,8 @@
-use clap::{self, Clap};
+use clap::Parser;
 
 /// This doc string acts as a help message when the user runs '--help'
 /// as do all doc strings on fields
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 #[clap(version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"), about = "Does serial<->UDP bridges, for now.")]
 #[clap(setting = clap::AppSettings::ColoredHelp)]
 pub struct Options {
