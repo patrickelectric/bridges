@@ -1,11 +1,16 @@
 use crate::cli;
 use crate::log;
+// The std lib uses hashbrown internally, so there should be no "extra" costs in
+// using it as the HashMap implementation, and it allows us to remove dependency
+// on nightly.
+//
+// See https://doc.rust-lang.org/src/std/collections/hash/map.rs.html#5-7
+//
+use hashbrown::HashMap;
 
 pub struct Socket {
     socket: std::net::UdpSocket,
-    clients: std::sync::Arc<
-        std::sync::Mutex<std::collections::HashMap<std::net::SocketAddr, std::time::SystemTime>>,
-    >,
+    clients: std::sync::Arc<std::sync::Mutex<HashMap<std::net::SocketAddr, std::time::SystemTime>>>,
 }
 
 pub fn new(address: &str) -> Result<Socket, std::io::Error> {
@@ -18,9 +23,7 @@ pub fn new(address: &str) -> Result<Socket, std::io::Error> {
 }
 
 impl Socket {
-    fn remove_old_clients(
-        &self,
-    ) -> std::collections::HashMap<std::net::SocketAddr, std::time::SystemTime> {
+    fn remove_old_clients(&self) -> HashMap<std::net::SocketAddr, std::time::SystemTime> {
         self.clients
             .lock()
             .unwrap()
