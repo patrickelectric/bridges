@@ -38,17 +38,19 @@ impl Socket {
     }
 
     pub fn write(&self, data: &[u8]) {
-        let old_clients = self.remove_old_clients();
+        if cli::options().no_udp_disconnection {
+            let old_clients = self.remove_old_clients();
 
-        if cli::is_verbose() && !old_clients.is_empty() {
-            log!("Removing old clients");
-            old_clients.iter().for_each(|(client, time)| {
-                log!(
-                    "Removing client: {}, with last message from: {:?}",
-                    client,
-                    time
-                );
-            })
+            if cli::is_verbose() && !old_clients.is_empty() {
+                log!("Removing old clients");
+                old_clients.iter().for_each(|(client, time)| {
+                    log!(
+                        "Removing client: {}, with last message from: {:?}",
+                        client,
+                        time
+                    );
+                })
+            }
         }
 
         for client in self.clients.lock().unwrap().keys() {
