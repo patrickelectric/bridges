@@ -69,12 +69,18 @@ pub fn main() -> Result<(), std::io::Error> {
 
     let mut serial_vector = vec![0; 4096];
     loop {
-        if let Ok(size) = serial.read(&mut serial_vector) {
-            let data = serial_vector[..size].to_vec();
-            if !data.is_empty() {
-                log!("R {} : {:?}", serial_path, data);
-                socket.write(&data);
+        match serial.read(&mut serial_vector) {
+            Ok(size) => {
+                let data = serial_vector[..size].to_vec();
+                if !data.is_empty() {
+                    log!("R {} : {:?}", serial_path, data);
+                    socket.write(&data);
+                }
             }
+            Err(error) if error.kind() == std::io::ErrorKind::BrokenPipe => {
+                panic!("Port disconnected: {serial_path}")
+            }
+            Err(_) => {}
         }
 
         let data = socket.read();
