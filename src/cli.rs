@@ -13,6 +13,10 @@ pub struct Options {
     #[clap(long = "abr")]
     pub automatic_baud_rate_procedure: bool,
 
+    /// Disable UDP timeout disconnection (10s)
+    #[clap(long = "no-udp-disconnection")]
+    pub no_udp_disconnection: bool,
+
     /// Sets the connection serial port and baud rate, default baud rate is 115200
     #[clap(
         short = 'p',
