@@ -38,7 +38,7 @@ impl Socket {
     }
 
     pub fn write(&self, data: &[u8]) {
-        if cli::options().no_udp_disconnection {
+        if !cli::options().no_udp_disconnection {
             let old_clients = self.remove_old_clients();
 
             if cli::is_verbose() && !old_clients.is_empty() {
