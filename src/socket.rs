@@ -90,11 +90,11 @@ impl Socket {
 
     pub fn write(&self, data: &[u8]) {
         if cli::options().no_udp_disconnection {
-            // Make sure that we are not going to have an infinity amount of clients!
-            self.remove_old_clients_by_max_number();
-        } else {
             self.remove_old_clients();
         }
+
+        // Make sure that we are not going to have an infinity amount of clients!
+        self.remove_old_clients_by_max_number();
 
         for client in self.clients.lock().unwrap().keys() {
             log!("W {} : {:?}", client, data);
