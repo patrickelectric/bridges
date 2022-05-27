@@ -90,7 +90,7 @@ impl Socket {
     }
 
     pub fn write(&self, data: &[u8]) {
-        if cli::options().no_udp_disconnection {
+        if !cli::options().no_udp_disconnection {
             self.remove_old_clients();
         }
 
