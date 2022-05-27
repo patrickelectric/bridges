@@ -23,8 +23,9 @@ pub fn new(address: &str) -> Result<Socket, std::io::Error> {
 }
 
 impl Socket {
-    fn remove_old_clients(&self) -> HashMap<std::net::SocketAddr, std::time::SystemTime> {
-        self.clients
+    fn remove_old_clients(&self) {
+        let old_clients: HashMap<std::net::SocketAddr, std::time::SystemTime> = self
+            .clients
             .lock()
             .unwrap()
             .drain_filter(|_client, time| {
@@ -34,7 +35,18 @@ impl Socket {
                     .as_secs()
                     > 10
             })
-            .collect()
+            .collect();
+
+        if cli::is_verbose() && !old_clients.is_empty() {
+            log!("Removing old clients");
+            old_clients.iter().for_each(|(client, time)| {
+                log!(
+                    "Removing client: {}, with last message from: {:?}",
+                    client,
+                    time
+                );
+            })
+        }
     }
 
     fn remove_old_clients_by_max_number(&self) {
@@ -57,10 +69,23 @@ impl Socket {
         let final_sockets: Vec<&std::net::SocketAddr> =
             times_clients.iter().map(|(time, socket)| socket).collect();
 
-        self.clients
+        let old_clients: HashMap<std::net::SocketAddr, std::time::SystemTime> = self
+            .clients
             .lock()
             .unwrap()
-            .retain(|socket, _| final_sockets.contains(&socket));
+            .drain_filter(|socket, _| !final_sockets.contains(&socket))
+            .collect();
+
+        if cli::is_verbose() && !old_clients.is_empty() {
+            log!("Removing old clients by maximum number");
+            old_clients.iter().for_each(|(client, time)| {
+                log!(
+                    "Removing client: {}, with last message from: {:?}",
+                    client,
+                    time
+                );
+            })
+        }
     }
 
     pub fn write(&self, data: &[u8]) {
