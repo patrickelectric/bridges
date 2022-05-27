@@ -17,6 +17,10 @@ pub struct Options {
     #[clap(long = "no-udp-disconnection")]
     pub no_udp_disconnection: bool,
 
+    /// Maximum number of clients allowed on UDP
+    #[clap(long = "udp-max-clients-number", default_value = "5")]
+    pub udp_max_clients_number: usize,
+
     /// Sets the connection serial port and baud rate, default baud rate is 115200
     #[clap(
         short = 'p',
