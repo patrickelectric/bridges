@@ -37,20 +37,38 @@ impl Socket {
             .collect()
     }
 
-    pub fn write(&self, data: &[u8]) {
-        if !cli::options().no_udp_disconnection {
-            let old_clients = self.remove_old_clients();
+    fn remove_old_clients_by_max_number(&self) {
+        let max_client_number = cli::options().udp_max_clients_number;
+        if self.clients.lock().unwrap().len() <= max_client_number {
+            return;
+        }
 
-            if cli::is_verbose() && !old_clients.is_empty() {
-                log!("Removing old clients");
-                old_clients.iter().for_each(|(client, time)| {
-                    log!(
-                        "Removing client: {}, with last message from: {:?}",
-                        client,
-                        time
-                    );
-                })
-            }
+        // Create a vector with (time, socket) to sort by time and remove old clients
+        let mut times_clients: Vec<(std::time::SystemTime, std::net::SocketAddr)> = self
+            .clients
+            .lock()
+            .unwrap()
+            .iter()
+            .map(|(socket, time)| (time.clone(), socket.clone()))
+            .collect();
+
+        times_clients.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        times_clients.truncate(max_client_number);
+        let final_sockets: Vec<&std::net::SocketAddr> =
+            times_clients.iter().map(|(time, socket)| socket).collect();
+
+        self.clients
+            .lock()
+            .unwrap()
+            .retain(|socket, _| final_sockets.contains(&socket));
+    }
+
+    pub fn write(&self, data: &[u8]) {
+        if cli::options().no_udp_disconnection {
+            // Make sure that we are not going to have an infinity amount of clients!
+            self.remove_old_clients_by_max_number();
+        } else {
+            self.remove_old_clients();
         }
 
         for client in self.clients.lock().unwrap().keys() {
