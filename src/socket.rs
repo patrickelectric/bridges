@@ -64,7 +64,8 @@ impl Socket {
             .map(|(socket, time)| (time.clone(), socket.clone()))
             .collect();
 
-        times_clients.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        // Newer first
+        times_clients.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
         times_clients.truncate(max_client_number);
         let final_sockets: Vec<&std::net::SocketAddr> =
             times_clients.iter().map(|(_, socket)| socket).collect();
