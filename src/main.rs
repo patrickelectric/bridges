@@ -23,6 +23,11 @@ mod socket;
 pub fn main() -> Result<(), std::io::Error> {
     let available_serial_ports = serialport::available_ports().unwrap_or_default();
 
+    if cli::options().available_serial_ports_full {
+        println!("Available serial ports:\n{:#?}", available_serial_ports);
+        return Ok(());
+    }
+
     if cli::options().available_serial_ports {
         println!(
             "Available serial ports: {}",
@@ -32,11 +37,6 @@ pub fn main() -> Result<(), std::io::Error> {
                 .collect::<Vec<String>>()
                 .join(", ")
         );
-        return Ok(());
-    }
-
-    if cli::options().available_serial_ports_full {
-        println!("Available serial ports:\n{:#?}", available_serial_ports);
         return Ok(());
     }
 
