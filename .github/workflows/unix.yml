@@ -39,6 +39,13 @@ jobs:
         target: ${{ matrix.TARGET }}
         override: true
 
+    - name: Install libudev
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt update
+        sudo apt install --yes libudev-dev
+        pkg-config libudev --libs libudev
+
     - uses: actions-rs/cargo@v1
       with:
         use-cross: true
