@@ -31,7 +31,11 @@ pub fn main() -> Result<(), std::io::Error> {
 
         #[cfg(target_os = "linux")]
         for device in available_serial_ports {
-            println!("port: {} -> {:?}", device.port_name, udev::get_device_links(&device.port_name).unwrap());
+            println!(
+                "port: {} -> {:?}",
+                device.port_name,
+                udev::get_device_links(&device.port_name).unwrap()
+            );
         }
 
         return Ok(());
