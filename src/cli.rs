@@ -75,19 +75,18 @@ pub fn options<'a>() -> &'a Options {
 }
 
 pub fn serial_port_configuration() -> (&'static str, u32) {
-    let serial_arg_result = options()
-        .serial_port
-        .as_ref()
-        .unwrap()
-        .split(':')
-        .collect::<Vec<&str>>();
+    let input = options().serial_port.as_ref().unwrap();
+    let serial_arg_result = input.rsplit_once(':');
 
-    (
-        serial_arg_result[0],
-        serial_arg_result
-            .get(1)
-            .unwrap_or(&"115200")
-            .parse::<u32>()
-            .unwrap_or_else(|_| panic!("Argument should follow the format {}", "IP:PORT")),
-    )
+    if let Some(result) = serial_arg_result {
+        return (
+            result.0,
+            result
+                .1
+                .parse::<u32>()
+                .unwrap_or_else(|_| panic!("Invalid baudrate.")),
+        );
+    }
+
+    return (input, 115200);
 }
