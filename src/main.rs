@@ -19,12 +19,18 @@ extern crate lazy_static;
 mod cli;
 mod log;
 mod socket;
+mod udev;
 
 pub fn main() -> Result<(), std::io::Error> {
     let available_serial_ports = serialport::available_ports().unwrap_or_default();
 
     if cli::options().available_serial_ports_full {
-        println!("Available serial ports:\n{:#?}", available_serial_ports);
+        println!("{available_serial_ports:#?}");
+
+        for device in available_serial_ports {
+            println!("port: {} -> {:?}", device.port_name, udev::get_device_links(&device.port_name).unwrap());
+        }
+
         return Ok(());
     }
 

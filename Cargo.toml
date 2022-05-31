@@ -23,3 +23,4 @@ clap = { version = "3.0", features = ["derive"] }
 hashbrown = "0.12"
 lazy_static = "1.4"
 serialport = "4.0"
+udev = "0.6.3"
