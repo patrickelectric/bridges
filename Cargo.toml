@@ -1,6 +1,6 @@
 [package]
 name = "bridges"
-version = "0.8.0"
+version = "0.8.2"
 description = "A simple UDP-Serial interface."
 readme = "README.md"
 license = "MIT"
