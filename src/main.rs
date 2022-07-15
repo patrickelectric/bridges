@@ -68,12 +68,15 @@ pub fn main() -> Result<(), std::io::Error> {
     }
 
     let mut serial_vector = vec![0; 4096];
+    let is_verbose = cli::is_verbose();
     loop {
         match serial.read(&mut serial_vector) {
             Ok(size) => {
                 let data = serial_vector[..size].to_vec();
                 if !data.is_empty() {
-                    log!("R {} : {:?}", serial_path, data);
+                    if is_verbose {
+                        log!("R {} : {:?}", serial_path, data);
+                    }
                     socket.write(&data);
                 }
             }
