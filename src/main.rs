@@ -53,7 +53,6 @@ pub fn main() -> Result<(), std::io::Error> {
         });
 
     let socket_address = &cli::options().udp_address;
-    log!("UDP server: {}", socket_address);
     let socket = socket::new(&socket_address)
         .unwrap_or_else(|error| panic!("Failed to bind address: {}", error));
 

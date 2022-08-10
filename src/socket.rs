@@ -1,5 +1,6 @@
 use crate::cli;
 use crate::log;
+use std::str::FromStr;
 // The std lib uses hashbrown internally, so there should be no "extra" costs in
 // using it as the HashMap implementation, and it allows us to remove dependency
 // on nightly.
@@ -10,15 +11,32 @@ use hashbrown::HashMap;
 
 pub struct Socket {
     socket: std::net::UdpSocket,
+    // When running in server mode
     clients: std::sync::Arc<std::sync::Mutex<HashMap<std::net::SocketAddr, std::time::SystemTime>>>,
+    // When running in client mode
+    destiny_address: Option<String>,
 }
 
 pub fn new(address: &str) -> Result<Socket, std::io::Error> {
-    let socket = std::net::UdpSocket::bind(address)?;
+    // Connect as server or client
+    let mut destiny_address = None;
+    let ip_address = std::net::IpAddr::from_str(address.split(':').next().unwrap()).unwrap();
+    let socket = match ip_address.is_loopback() || ip_address.is_unspecified() {
+        true => std::net::UdpSocket::bind(address).unwrap(),
+        false => {
+            destiny_address = Some(address.to_string());
+            std::net::UdpSocket::bind("0.0.0.0:0").unwrap()
+        }
+    };
+    log!("UDP Server: {}", socket.local_addr().unwrap());
+    if let Some(client) = &destiny_address {
+        log!("UDP Client: {}", client);
+    }
     socket.set_read_timeout(Some(std::time::Duration::from_micros(100)))?;
     Ok(Socket {
         socket,
         clients: std::sync::Arc::new(std::sync::Mutex::new(Default::default())),
+        destiny_address,
     })
 }
 
@@ -90,6 +108,14 @@ impl Socket {
     }
 
     pub fn write(&self, data: &[u8]) {
+        if let Some(client) = &self.destiny_address {
+            if let Err(error) = self.socket.send_to(data, client) {
+                println!(
+                    "Error while writing in UDP: {:?} for client: {}",
+                    error, client
+                );
+            }
+        }
         if !cli::options().no_udp_disconnection {
             self.remove_old_clients();
         }
