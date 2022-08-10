@@ -38,7 +38,7 @@ pub struct Options {
     #[clap(long = "available-serial-ports-full")]
     pub available_serial_ports_full: bool,
 
-    /// Sets the UDP connection ip and port
+    /// Sets the UDP connection ip and port, use `0.0.0.0` or `127.0.0.1` for server and something else for client
     #[clap(
         short = 'u',
         long = "udp-port",
