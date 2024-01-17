@@ -53,7 +53,8 @@ pub fn main() -> Result<(), std::io::Error> {
         });
 
     let socket_address = &cli::options().udp_address;
-    let socket = socket::new(&socket_address)
+    let listen_port = cli::options().udp_listen_port.unwrap_or(0);
+    let socket = socket::new(socket_address, listen_port)
         .unwrap_or_else(|error| panic!("Failed to bind address: {}", error));
 
     // Serial and socket are ready, time to run ABR
