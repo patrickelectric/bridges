@@ -46,6 +46,10 @@ pub struct Options {
         default_value = "0.0.0.0:9092"
     )]
     pub udp_address: String,
+
+    /// Sets a UDP port to be listened
+    #[clap(long = "--listen-port")]
+    pub udp_listen_port: Option<u16>,
 }
 
 #[derive(Debug)]

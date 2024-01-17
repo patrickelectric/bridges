@@ -17,7 +17,7 @@ pub struct Socket {
     destiny_address: Option<String>,
 }
 
-pub fn new(address: &str) -> Result<Socket, std::io::Error> {
+pub fn new(address: &str, listen_port: u16) -> Result<Socket, std::io::Error> {
     // Connect as server or client
     let mut destiny_address = None;
     let ip_address = std::net::IpAddr::from_str(address.split(':').next().unwrap()).unwrap();
@@ -25,7 +25,7 @@ pub fn new(address: &str) -> Result<Socket, std::io::Error> {
         true => std::net::UdpSocket::bind(address).unwrap(),
         false => {
             destiny_address = Some(address.to_string());
-            std::net::UdpSocket::bind("0.0.0.0:0").unwrap()
+            std::net::UdpSocket::bind(format!("0.0.0.0:{listen_port}")).unwrap()
         }
     };
     log!("UDP Server: {}", socket.local_addr().unwrap());
