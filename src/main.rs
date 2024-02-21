@@ -88,7 +88,16 @@ pub fn main() -> Result<(), std::io::Error> {
 
         let data = socket.read();
         if !data.is_empty() {
-            serial.write_all(&data)?;
+            if let Err(error) = serial.write_all(&data) {
+                match error.kind() {
+                    std::io::ErrorKind::TimedOut => {
+                        log!("Timeout error while writing to serial port. Consider increasing the baud rate on that port.");
+                    }
+                    _ => {
+                        log!("Error while writing to serial port: {}", error);
+                    }
+                }
+            }
         }
 
         // Avoid cpu spin lock
