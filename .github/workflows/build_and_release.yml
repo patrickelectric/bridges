@@ -36,6 +36,9 @@ jobs:
           TARGET: aarch64-apple-darwin
 
         - os: ubuntu-latest
+          TARGET: aarch64-unknown-linux-musl
+
+        - os: ubuntu-latest
           TARGET: arm-unknown-linux-musleabihf
 
         - os: ubuntu-latest
