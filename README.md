@@ -7,10 +7,10 @@ A simple UDP-Serial interface.
 
 ## Downloads :package:
 
-- :computer: [Windows](https://github.com/patrickelectric/bridges/releases/download/continuous/bridges-i686-pc-windows-msvc.zip)
-- :apple: [MacOS](https://github.com/patrickelectric/bridges/releases/download/continuous/bridges-x86_64-apple-darwin)
-- :penguin: [Linux](https://github.com/patrickelectric/bridges/releases/download/continuous/bridges-armv7-unknown-linux-musleabihf)
-- :strawberry: [Raspberry](https://github.com/patrickelectric/bridges/releases/download/continuous/bridges-armv7-unknown-linux-musleabihf)
+- :computer: [Windows](https://github.com/patrickelectric/bridges/releases/download/latest/bridges-i686-pc-windows-msvc.zip)
+- :apple: [MacOS](https://github.com/patrickelectric/bridges/releases/download/latest/bridges-x86_64-apple-darwin)
+- :penguin: [Linux](https://github.com/patrickelectric/bridges/releases/download/latest/bridges-armv7-unknown-linux-musleabihf)
+- :strawberry: [Raspberry](https://github.com/patrickelectric/bridges/releases/latest/continuous/bridges-armv7-unknown-linux-musleabihf)
 
 # Example
 ## Running as server
