@@ -7,9 +7,9 @@ A simple UDP-Serial interface.
 
 ## Downloads :package:
 
-- :computer: [Windows](https://github.com/patrickelectric/bridges/releases/latest/download/bridges-i686-pc-windows-msvc.zip)
+- :computer: [Windows](https://github.com/patrickelectric/bridges/releases/latest/download/bridges-x86_64-pc-windows-msvc.exe)
 - :apple: [MacOS](https://github.com/patrickelectric/bridges/releases/latest/download/bridges-x86_64-apple-darwin)
-- :penguin: [Linux](https://github.com/patrickelectric/bridges/releases/latest/download/bridges-armv7-unknown-linux-musleabihf)
+- :penguin: [Linux](https://github.com/patrickelectric/bridges/releases/latest/download/bridges-x86_64-unknown-linux-musl)
 - :strawberry: [Raspberry](https://github.com/patrickelectric/bridges/latest/releases/continuous/bridges-armv7-unknown-linux-musleabihf)
 
 # Example
