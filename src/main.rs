@@ -71,7 +71,7 @@ pub fn main() -> Result<(), std::io::Error> {
             Err(_) => {}
         }
 
-        let data = socket.read();
+        let (data, empty_datagram) = socket.read();
         if !data.is_empty() {
             if let Err(error) = serial.write_all(&data) {
                 match error.kind() {
@@ -83,6 +83,15 @@ pub fn main() -> Result<(), std::io::Error> {
                     }
                 }
             }
+        }
+
+        if empty_datagram {
+            log!("Start line break procedure");
+            serial.set_break()?;
+            std::thread::sleep(std::time::Duration::from_millis(10));
+            serial.clear_break()?;
+            std::thread::sleep(std::time::Duration::from_micros(10));
+            serial.write_all(&[b'U'; 10])?;
         }
 
         // Avoid cpu spin lock

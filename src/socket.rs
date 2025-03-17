@@ -138,11 +138,17 @@ impl Socket {
         }
     }
 
-    pub fn read(&self) -> Vec<u8> {
+    pub fn read(&self) -> (Vec<u8>, bool) {
         let mut buffer = vec![0; 4096];
         let mut data = vec![];
         let is_verbose = cli::is_verbose();
+        let mut empty_datagram = false;
         while let Ok((size, client)) = self.socket.recv_from(&mut buffer) {
+            if size == 0 {
+                empty_datagram = true;
+                continue;
+            }
+
             let now = std::time::SystemTime::now();
             if is_verbose {
                 if !self.clients.lock().unwrap().contains_key(&client) {
@@ -154,6 +160,6 @@ impl Socket {
             self.clients.lock().unwrap().insert(client, now);
             data.extend_from_slice(&buffer[..size]);
         }
-        return data;
+        (data, empty_datagram)
     }
 }
