@@ -1,18 +1,3 @@
-// TODO: compile time check to detect when 'hash_drain_filter' has gone stable
-//
-// The following nightly feature was being used in a single line of code, so
-// disabling it allow us to switch to stable Rust. We'd like to have a compile
-// time chechk that would tell us when it's not nightly anymore.
-//
-// However it seems Rust currently lacks the ability to identify if a certain
-// path is present during compile time without spawning a new build process (see
-// https://rust-lang.github.io/rfcs/2523-cfg-path-version.html).
-//
-// Once the 'cfg_accessible' feature is implemented in Rust, a simple attribute
-// check will allow us to implement this todo.
-//
-//#![feature(hash_drain_filter)]
-
 #[macro_use]
 extern crate lazy_static;
 
