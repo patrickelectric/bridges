@@ -8,31 +8,33 @@ use std::str::FromStr;
 // See https://doc.rust-lang.org/src/std/collections/hash/map.rs.html#5-7
 //
 use hashbrown::HashMap;
+use tokio::time::timeout;
 
 pub struct Socket {
-    socket: std::net::UdpSocket,
+    socket: tokio::net::UdpSocket,
     // When running in server mode
     clients: std::sync::Arc<std::sync::Mutex<HashMap<std::net::SocketAddr, std::time::SystemTime>>>,
     // When running in client mode
     destiny_address: Option<String>,
 }
 
-pub fn new(address: &str, listen_port: u16) -> Result<Socket, std::io::Error> {
+pub async fn new(address: &str, listen_port: u16) -> Result<Socket, std::io::Error> {
     // Connect as server or client
     let mut destiny_address = None;
     let ip_address = std::net::IpAddr::from_str(address.split(':').next().unwrap()).unwrap();
     let socket = match ip_address.is_loopback() || ip_address.is_unspecified() {
-        true => std::net::UdpSocket::bind(address).unwrap(),
+        true => tokio::net::UdpSocket::bind(address).await.unwrap(),
         false => {
             destiny_address = Some(address.to_string());
-            std::net::UdpSocket::bind(format!("0.0.0.0:{listen_port}")).unwrap()
+            tokio::net::UdpSocket::bind(format!("0.0.0.0:{listen_port}"))
+                .await
+                .unwrap()
         }
     };
     log!("UDP Server: {}", socket.local_addr().unwrap());
     if let Some(client) = &destiny_address {
         log!("UDP Client: {}", client);
     }
-    socket.set_read_timeout(Some(std::time::Duration::from_micros(100)))?;
     Ok(Socket {
         socket,
         clients: std::sync::Arc::new(std::sync::Mutex::new(Default::default())),
@@ -107,9 +109,9 @@ impl Socket {
         }
     }
 
-    pub fn write(&self, data: &[u8]) {
+    pub async fn write(&self, data: &[u8]) {
         if let Some(client) = &self.destiny_address {
-            if let Err(error) = self.socket.send_to(data, client) {
+            if let Err(error) = self.socket.send_to(data, client).await {
                 println!(
                     "Error while writing in UDP: {:?} for client: {}",
                     error, client
@@ -129,7 +131,7 @@ impl Socket {
             if is_verbose {
                 log!("W {} : {:?}", client, data);
             }
-            if let Err(error) = self.socket.send_to(data, client) {
+            if let Err(error) = self.socket.send_to(data, client).await {
                 println!(
                     "Error while writing in UDP: {:?} for client: {}",
                     error, client
@@ -138,12 +140,17 @@ impl Socket {
         }
     }
 
-    pub fn read(&self) -> (Vec<u8>, bool) {
+    pub async fn read(&self) -> (Vec<u8>, bool) {
         let mut buffer = vec![0; 4096];
         let mut data = vec![];
         let is_verbose = cli::is_verbose();
         let mut empty_datagram = false;
-        while let Ok((size, client)) = self.socket.recv_from(&mut buffer) {
+        while let Ok(Ok((size, client))) = timeout(
+            std::time::Duration::from_micros(100),
+            self.socket.recv_from(&mut buffer),
+        )
+        .await
+        {
             if size == 0 {
                 empty_datagram = true;
                 continue;
